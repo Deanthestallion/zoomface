@@ -6,7 +6,7 @@ def zoom_on_faces(input_path, output_path, zoom_factor=1.5):
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS)
 
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # Try 'XVID' or 'avc1' if mp4v fails
     out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
@@ -17,10 +17,10 @@ def zoom_on_faces(input_path, output_path, zoom_factor=1.5):
             break
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
 
         if len(faces) > 0:
-            (x, y, w, h) = faces[0]
+            x, y, w, h = faces[0]
             cx, cy = x + w//2, y + h//2
 
             crop_w = int(w * zoom_factor)
@@ -30,6 +30,11 @@ def zoom_on_faces(input_path, output_path, zoom_factor=1.5):
             y1 = max(cy - crop_h // 2, 0)
             x2 = min(cx + crop_w // 2, frame.shape[1])
             y2 = min(cy + crop_h // 2, frame.shape[0])
+
+            # Prevent empty frames
+            if x2 - x1 < 20 or y2 - y1 < 20:
+                out.write(frame)
+                continue
 
             zoomed = frame[y1:y2, x1:x2]
             zoomed = cv2.resize(zoomed, (width, height))
