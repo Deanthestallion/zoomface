@@ -9,7 +9,8 @@ def zoom_on_faces(input_path, output_path, zoom_factor=1.5, max_frames=300):
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS)
 
-    fourcc = cv2.VideoWriter_fourcc(*'avc1')
+    # Changed codec from 'avc1' to 'mp4v' to avoid encoder not found error
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     out = cv2.VideoWriter(output_path, fourcc, fps, (width, height))
 
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
